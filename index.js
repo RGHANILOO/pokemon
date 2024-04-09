@@ -1,96 +1,101 @@
-// input element #search-input
-// button element #search-button
-const pokeURL = "https://pokeapi.co/api/v2/pokemon/pikachu";
-const form = document.querySelector("#search-form");
-const output = document.querySelector("#search-output");
-
-// form.addEventListener("submit", (e) => {
-//   e.preventDefault();
-
-//   const formData = new FormData(form);
-//   const name = formData.get("name");
-
-// }
-
-// async data fetch
-const fetchData = async () => {
-  try {
-    const respsonse = await fetch(pokeURL);
-    const data = await respsonse.json();
-    // console.log(data);
-    showPokemon(data);
-  } catch (err) {
-    console.error(err);
-  }
-};
-fetchData();
-
 const showPokemon = (data) => {
-  // console.log(data)
+  // console.log(data);
+ const height = data.height;
+ const weight = data.weight;
+ const id = data.id;
+ const name = data.name;
+ // console.log({name}, {id}, {height}, {weight});
+ const { stats, types, sprites } = data;
 
-  const height = data.height;
-  const weight = data.weight;
-  const id = data.id;
-  const name = data.name;
-  // console.log({name}, {id}, {height}, {weight});
-  const { stats, types, sprites } = data;
+ let hp, attack, defense, special_attack, special_defense, speed;
 
-  // Initialize variables for each stat
-  let hp, attack, defense, special_attack, special_defense, speed;
+ stats.forEach((stat) => {
+   const statName = stat.stat.name;
+   const statValue = stat.base_stat;
+   switch (statName) {
+     case "hp":
+       hp = statValue;
+       break;
+     case "attack":
+       attack = statValue;
+       break;
+     case "defense":
+       defense = statValue;
+       break;
+     case "special-defense":
+       special_defense = statValue;
+       break;
+     case "special-attack":
+       special_attack = statValue;
+       break;
+     case "speed":
+       speed = statValue;
+       break;
+     default:
+       
+       break;
+   }
+ });
+ // console.log(
+ //     { hp },
+ //     { attack },
+ //     { defense },
+ //     { special_attack },
+ //     { special_defense },
+ //     { speed }
+ //   );
 
-  // Loop through each object in the stats array
-  stats.forEach((stat) => {
-    // Extract stat name and value
-    const statName = stat.stat.name;
-    const statValue = stat.base_stat;
+ const typesList = types.map(type => type.type.name).join(', ');
 
-    // Assign the value to the corresponding variable
-    switch (statName) {
-      case "hp":
-        hp = statValue;
-        break;
-      case "attack":
-        attack = statValue;
-        break;
-      case "defense":
-        defense = statValue;
-        break;
-      case "special-defense":
-        special_defense = statValue;
-        break;
-      case "special-attack":
-        special_attack = statValue;
-        break;
-      case "speed":
-        speed = statValue;
-        break;
-      default:
-        // Handle unknown stat names
-        break;
-    }
-  });
-  console.log(
-    { hp },
-    { attack },
-    { defense },
-    { special_attack },
-    { special_defense },
-    { speed }
-  );
-  const { type } = types;
-  const { front_default } = sprites;
+ // Update the DOM elements
+ document.querySelector("#pokemon-name").textContent = name;
+ document.querySelector("#pokemon-id").textContent = `# ${id}`;
+ document.querySelector("#weight").textContent = `Weight: ${weight}`;
+ document.querySelector("#height").textContent = `Height: ${height}`;
+ document.querySelector("#types").textContent = ` ${typesList}`;
+ document.querySelector("#hp").textContent = ` ${hp}`;
+ document.querySelector("#attack").textContent = ` ${attack}`;
+ document.querySelector("#defense").textContent = ` ${defense}`;
+ document.querySelector("#special-attack").textContent = ` ${special_attack}`;
+ document.querySelector("#special-defense").textContent = ` ${special_defense}`;
+ document.querySelector("#speed").textContent = ` ${speed}`;
 
-  // console.log({stats})
-  console.log(types);
-  // console.log({stats[0].hp}, {attack}, {defense}, {special_attack}, {special_defense}, {speed});
-  // console.log({type});
-  console.log(front_default);
+ // Set the sprite image
+ document.querySelector("#sprite").src = sprites.back_default;
 };
-showPokemon();
 
-/**
+// Function to fetch Pokemondata based on user input
+const fetchPokemonData = async (pokemonName) => {
+ const pokeURL = `https://pokeapi.co/api/v2/pokemon/${pokemonName}`;
+ 
+ try {
+   const response = await fetch(pokeURL);
+   const data = await response.json();
+   return data;
+ } catch (error) {
+   console.error('Error fetching Pokémon data:', error);
+   throw error;
+ }
+};
 
- * types[{}]
- * stats[{hp, attack, defense, special-attack, special-defense, speed }]
- * sprite/front-default
- */
+// Function to handle form submission
+const handleFormSubmit = async (event) => {
+ event.preventDefault(); 
+ console.log('Form submitted');
+ const form = event.currentTarget; // Get the form element
+ const formData = new FormData(form); // Create a FormData object from the form
+ 
+ const pokemonName = formData.get("pokemon").toLowerCase(); // Get the Pokemon and process
+ 
+ try {
+   const pokemonData = await fetchPokemonData(pokemonName); // Fetch Pokémon data based on the name
+   showPokemon(pokemonData); // Display Poké
+ } catch (error) {
+  
+   console.error('i got no submission:', error);
+ }
+};
+
+// Event listener to handle form submission
+const form = document.querySelector("#search-form");
+form.addEventListener("submit", handleFormSubmit);
